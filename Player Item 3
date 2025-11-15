@@ -1,0 +1,84 @@
+game.StarterGui:SetCore("SendNotification", {
+    Title = "[ 📛 ]   ดึงผ้าพันแผลสำเร็จ",
+    Text = "________________________________________________________",
+    Duration = 10
+})
+
+-- เสี่ยโอนไวโหมด: ลากได้หลายชื่อไอเทม
+local Players = cloneref(game:GetService("Players"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local Workspace = cloneref(game:GetService("Workspace"))
+
+-- ====== ตั้งค่า ======
+-- ใส่ชื่อไอเทมได้หลายชิ้น เช่น {"Carrot", "Potato", "Onion"}
+local itemNames = {"Bandage", "MedKit"}
+
+local offsetDistance = 1
+local delayBetweenItems = 0 -- เร็วจี๊ด
+
+-- ====== เตรียมตัวละคร ======
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- ====== อ้างอิงโฟลเดอร์/รีโมท ======
+local itemsFolder = Workspace:WaitForChild("Items")
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
+local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
+
+-- ====== สร้างเซ็ตชื่อไอเทม (ไม่สนตัวพิมพ์) ======
+local nameSet = {}
+for _, n in ipairs(itemNames) do
+nameSet[string.lower(n)] = true
+end
+
+local function isTargetItem(name: string): boolean
+return nameSet[string.lower(name)] == true
+end
+
+-- ====== ฟังก์ชันลาก ======
+local function dragItemToPosition(itemToDrag, position)
+local clonedItem = cloneref(itemToDrag)
+startDragging:FireServer(clonedItem)
+
+task.spawn(function()
+if clonedItem:IsA("BasePart") then
+clonedItem.CFrame = CFrame.new(position)
+elseif clonedItem:IsA("Model") and clonedItem.PrimaryPart then
+clonedItem:SetPrimaryPartCFrame(CFrame.new(position))
+end
+end)
+
+task.wait(0.05)
+stopDragging:FireServer(clonedItem)
+end
+
+-- ====== ลากทุกไอเทมที่ชื่ออยู่ในลิสต์ ======
+local function dragAllItemsToPlayer()
+local hrpCFrame = workspace.Map.Campground.MainFire.Center.CFrame
+local targetPosition = (hrpCFrame * CFrame.new(0, 15, -offsetDistance)).Position -- เพิ่มความสูง 3 studs
+local children = itemsFolder:GetChildren()
+local itemsToDrag = {}
+ 
+
+for _, item in ipairs(children) do
+if isTargetItem(item.Name) then
+table.insert(itemsToDrag, item)
+end
+end
+ 
+
+print("Found " .. #itemsToDrag .. " items to drag")
+ 
+
+for _, item in ipairs(itemsToDrag) do
+dragItemToPosition(item, targetPosition)
+task.wait(delayBetweenItems)
+end
+ 
+
+print("Finished!")
+end
+
+dragAllItemsToPlayer()
