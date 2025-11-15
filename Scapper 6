@@ -11,7 +11,7 @@ local Workspace = cloneref(game:GetService("Workspace"))
 
 -- ====== ตั้งค่า ======
 -- ใส่ชื่อไอเทมได้หลายชิ้น เช่น {"Carrot", "Potato", "Onion"}
-local itemNames = {"Iron Body", "Alien Armour", "Thorn Body", "Poison Armour", "Obsidiron Armour"}
+local itemNames = {"Leather Body", "Iron Body", "Alien Armour", "Thorn Body", "Poison Armour", "Obsidiron Armour"}
 local delayBetweenItems = 0 -- เร็วจี๊ด
 
 -- ====== พิกัดเป้าหมาย (เพิ่ม Y +15 เพื่อให้ลากลงได้ดี) ======
